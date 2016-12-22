@@ -6,7 +6,7 @@ pymysql.install_as_MySQLdb()
 
 def lambda_handler(event, context):
     if (event["session"]["application"]["applicationId"] !=
-            "amzn1.ask.skill.ad476828-c2ba-4025-97cd-435f0789e956"):
+            "amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"):
         raise ValueError("Invalid Application ID")
     
     if event["session"]["new"]:
@@ -29,12 +29,8 @@ def on_intent(intent_request, session):
     intent = intent_request["intent"]
     intent_name = intent_request["intent"]["name"]
 
-    if intent_name == "CourseWhen":
-        return course_when(intent)
-    elif intent_name == "CourseWhere":
-        return course_where(intent)
-    elif intent_name == "CourseSeats":
-        return course_seats(intent)
+    if intent_name == "GetNearestBus":
+        return get_nearest_bus(intent)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
@@ -47,11 +43,29 @@ def on_session_ended(session_ended_request, session):
     # Cleanup goes here...
 
 def handle_session_end_request():
-    card_title = "LOUIE - Thanks"
-    speech_output = "Thank you for using the LOUIE skill.  See you next time!"
+    card_title = "Translocator - Thanks"
+    speech_output = "Thank you for using the translocator skill.  See you next time!"
     should_end_session = True
 
     return build_response({}, build_speechlet_response(card_title, speech_output, None, should_end_session))
+
+def get_nearest_bus(intent):
+	session_attributes = {}
+    card_title = "Transloc nearest bus time"
+    speech_output = "You're trying to get a bus time. Awesome."
+    reprompt_text = "I'm not sure what you're asking for. "
+    should_end_session = False
+
+    ###########
+    #CODE HERE
+    ##########
+
+
+
+
+
+    return build_response(session_attributes, build_speechlet_response(
+    card_title, speech_output, reprompt_text, should_end_session))
 
 def course_when(intent):
     session_attributes = {}
