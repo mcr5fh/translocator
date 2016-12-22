@@ -5,6 +5,9 @@ import json
 import unirest
 #pymysql.install_as_MySQLdb()
 
+#transloc API
+from translocController import TranslocController
+
 def lambda_handler(event, context):
     if (event["session"]["application"]["applicationId"] !=
             "amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"):
@@ -53,17 +56,18 @@ def handle_session_end_request():
 def get_nearest_bus(intent):
 	session_attributes = {}
     card_title = "Transloc nearest bus time"
-    speech_output = "You're trying to get a bus time. Awesome."
+    speech#_output = "You're trying to get a bus time. Awesome."
     reprompt_text = "I'm not sure what you're asking for. "
     should_end_session = False
 
     ###########
     #CODE HERE
     ##########
+    t = TranslocController()
+    #hard coded
+    min_till_bus = t.get_next_bus_arrival(347, 4123822)
 
-
-
-
+    speech_output = "Next bus is in " + str(min_till_bus) + " minutes"
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
