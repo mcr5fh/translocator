@@ -56,7 +56,7 @@ def handle_session_end_request():
 def get_nearest_bus(intent):
     session_attributes = {}
     card_title = "Transloc nearest bus time"
-    speech#_output = "You're trying to get a bus time. Awesome."
+    speech_output = "You're trying to get a bus time. Awesome."
     reprompt_text = "I'm not sure what you're asking for. "
     should_end_session = False
 
