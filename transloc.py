@@ -1,8 +1,9 @@
 import urllib2
 import json
-import pymysql
-import re
-pymysql.install_as_MySQLdb()
+#import pymysql
+#import re
+import unirest
+#pymysql.install_as_MySQLdb()
 
 def lambda_handler(event, context):
     if (event["session"]["application"]["applicationId"] !=
@@ -67,191 +68,6 @@ def get_nearest_bus(intent):
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
 
-def course_when(intent):
-    session_attributes = {}
-    card_title = "LOUIE course times"
-    speech_output = "I'm not sure which course you wanted. " \
-                    "Please try again."
-    reprompt_text = "I'm not sure which course you wanted. " \
-                    "Try asking about Four thousand seven hundred forty for example."
-    should_end_session = False
-
-
-    if "coursenum" in intent["slots"]:
-        course_num = intent["slots"]["coursenum"]["value"]
-
-        course_num_s = course_num.encode('utf8')
-        num = re.sub('[,]', '', course_num_s)
-        #station_code = get_station_code(station_name.lower())
-
-        conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
-        cur = conn.cursor()
-
-        #check course
-        executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
-
-        cur.execute(executeString)
-        if cur.fetchall():
-            speech_output = ""
-            executeString = '''Select
-                DISTINCT Days
-                from CS1172Data where
-                NUMBER = "%s"
-
-                ''' % (num)
-
-            cur.execute(executeString)
-
-            string = "course " + num + " meets at the following times: "
-            count = 0
-            for (meetingTime) in cur:
-                first = meetingTime[0]
-                #do some string manipulation
-                first = re.sub('(Tu)', 'Tuesday ', first)
-                first = re.sub('(Th)', 'Thursday ', first)
-                first = re.sub('(Mo)', 'Monday ', first)
-                first = re.sub('(We)', 'Wednesday ', first)
-                first = re.sub('(Fr)', 'Friday ', first)
-                first = re.sub('( - )', ' to ', first)
-                if(count !=0):
-                    string += ",  {" + first + "}"
-                else:
-                    string += "{" + first + "}"
-                count = count + 1
-
-
-            speech_output += string
-            reprompt_text = ""
-
-        cur.close()
-        conn.close()
-
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-def course_where(intent):
-    session_attributes = {}
-    card_title = "LOUIE course locations"
-    speech_output = "I'm not sure which course you wanted. " \
-                    "Please try again."
-    reprompt_text = "I'm not sure which course you wanted. " \
-                    "Try asking about Four thousand seven hundred forty for example."
-    should_end_session = False
-
-
-    if "coursenum" in intent["slots"]:
-        course_num = intent["slots"]["coursenum"]["value"]
-
-        course_num_s = course_num.encode('utf8')
-        num = re.sub('[,]', '', course_num_s)
-        #station_code = get_station_code(station_name.lower())
-
-        conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
-        cur = conn.cursor()
-
-        #check course
-        executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
-
-        cur.execute(executeString)
-        if cur.fetchall():
-            speech_output = ""
-            executeString = '''Select
-                DISTINCT Room
-                from CS1172Data where
-                NUMBER = "%s"
-
-                ''' % (num)
-
-            cur.execute(executeString)
-
-            string = "course " + num + " meets at the following locations: "
-            count = 0
-            for (meetingTime) in cur:
-                first = meetingTime[0]
-                
-                first = re.sub('(Bldg)', 'Building', first)
-                first = re.sub('(Engr)', 'Engineering', first)
-
-
-                if(count !=0):
-                    string += ",  {" + first + "}"
-                else:
-                    string += "{" + first + "}"
-                count = count + 1
-
-
-            speech_output += string
-            reprompt_text = ""
-
-        cur.close()
-        conn.close()
-
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-def course_seats(intent):
-    session_attributes = {}
-    card_title = "LOUIE course locations"
-    speech_output = "I'm not sure which course you wanted. " \
-                    "Please try again."
-    reprompt_text = "I'm not sure which course you wanted. " \
-                    "Try asking about Four thousand seven hundred forty for example."
-    should_end_session = False
-
-
-    if "coursenum" in intent["slots"]:
-        course_num = intent["slots"]["coursenum"]["value"]
-
-        course_num_s = course_num.encode('utf8')
-        num = re.sub('[,]', '', course_num_s)
-
-        #station_code = get_station_code(station_name.lower())
-
-        conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
-        cur = conn.cursor()
-
-        #check course
-        executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
-
-        cur.execute(executeString)
-        if cur.fetchall():
-            speech_output = ""
-            
-            executeString = '''Select
-            SUM(EnrollmentLimit) from CS1172Data where
-            NUMBER = "%s" 
-            ''' % (num)
-
-            cur.execute(executeString)
-
-            for val in cur:
-                offered = val[0]
-
-            executeString = '''Select
-            SUM(Enrollment) from CS1172Data where
-            NUMBER = "%s" 
-
-            ''' % (num)
-
-            cur.execute(executeString)
-
-            for val in cur:
-                taken = val[0]
-
-            avail = offered - taken
-            availStr = str(avail)
-
-            #string = "There are " + str(three) + "seats available in course " + num
-            string = "There are {0} seats available in course {1}".format(availStr, num)
-
-            speech_output += string
-            reprompt_text = ""
-
-        cur.close()
-        conn.close()
-
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
 
 def get_welcome_response():
     session_attributes = {}
@@ -293,3 +109,190 @@ def build_response(session_attributes, speechlet_response):
         "sessionAttributes": session_attributes,
         "response": speechlet_response
     }
+
+# def course_when(intent):
+#     session_attributes = {}
+#     card_title = "LOUIE course times"
+#     speech_output = "I'm not sure which course you wanted. " \
+#                     "Please try again."
+#     reprompt_text = "I'm not sure which course you wanted. " \
+#                     "Try asking about Four thousand seven hundred forty for example."
+#     should_end_session = False
+
+
+#     if "coursenum" in intent["slots"]:
+#         course_num = intent["slots"]["coursenum"]["value"]
+
+#         course_num_s = course_num.encode('utf8')
+#         num = re.sub('[,]', '', course_num_s)
+#         #station_code = get_station_code(station_name.lower())
+
+#         conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
+#         cur = conn.cursor()
+
+#         #check course
+#         executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
+
+#         cur.execute(executeString)
+#         if cur.fetchall():
+#             speech_output = ""
+#             executeString = '''Select
+#                 DISTINCT Days
+#                 from CS1172Data where
+#                 NUMBER = "%s"
+
+#                 ''' % (num)
+
+#             cur.execute(executeString)
+
+#             string = "course " + num + " meets at the following times: "
+#             count = 0
+#             for (meetingTime) in cur:
+#                 first = meetingTime[0]
+#                 #do some string manipulation
+#                 first = re.sub('(Tu)', 'Tuesday ', first)
+#                 first = re.sub('(Th)', 'Thursday ', first)
+#                 first = re.sub('(Mo)', 'Monday ', first)
+#                 first = re.sub('(We)', 'Wednesday ', first)
+#                 first = re.sub('(Fr)', 'Friday ', first)
+#                 first = re.sub('( - )', ' to ', first)
+#                 if(count !=0):
+#                     string += ",  {" + first + "}"
+#                 else:
+#                     string += "{" + first + "}"
+#                 count = count + 1
+
+
+#             speech_output += string
+#             reprompt_text = ""
+
+#         cur.close()
+#         conn.close()
+
+#     return build_response(session_attributes, build_speechlet_response(
+#         card_title, speech_output, reprompt_text, should_end_session))
+
+# def course_where(intent):
+#     session_attributes = {}
+#     card_title = "LOUIE course locations"
+#     speech_output = "I'm not sure which course you wanted. " \
+#                     "Please try again."
+#     reprompt_text = "I'm not sure which course you wanted. " \
+#                     "Try asking about Four thousand seven hundred forty for example."
+#     should_end_session = False
+
+
+#     if "coursenum" in intent["slots"]:
+#         course_num = intent["slots"]["coursenum"]["value"]
+
+#         course_num_s = course_num.encode('utf8')
+#         num = re.sub('[,]', '', course_num_s)
+#         #station_code = get_station_code(station_name.lower())
+
+#         conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
+#         cur = conn.cursor()
+
+#         #check course
+#         executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
+
+#         cur.execute(executeString)
+#         if cur.fetchall():
+#             speech_output = ""
+#             executeString = '''Select
+#                 DISTINCT Room
+#                 from CS1172Data where
+#                 NUMBER = "%s"
+
+#                 ''' % (num)
+
+#             cur.execute(executeString)
+
+#             string = "course " + num + " meets at the following locations: "
+#             count = 0
+#             for (meetingTime) in cur:
+#                 first = meetingTime[0]
+                
+#                 first = re.sub('(Bldg)', 'Building', first)
+#                 first = re.sub('(Engr)', 'Engineering', first)
+
+
+#                 if(count !=0):
+#                     string += ",  {" + first + "}"
+#                 else:
+#                     string += "{" + first + "}"
+#                 count = count + 1
+
+
+#             speech_output += string
+#             reprompt_text = ""
+
+#         cur.close()
+#         conn.close()
+
+#     return build_response(session_attributes, build_speechlet_response(
+#         card_title, speech_output, reprompt_text, should_end_session))
+
+# def course_seats(intent):
+#     session_attributes = {}
+#     card_title = "LOUIE course locations"
+#     speech_output = "I'm not sure which course you wanted. " \
+#                     "Please try again."
+#     reprompt_text = "I'm not sure which course you wanted. " \
+#                     "Try asking about Four thousand seven hundred forty for example."
+#     should_end_session = False
+
+
+#     if "coursenum" in intent["slots"]:
+#         course_num = intent["slots"]["coursenum"]["value"]
+
+#         course_num_s = course_num.encode('utf8')
+#         num = re.sub('[,]', '', course_num_s)
+
+#         #station_code = get_station_code(station_name.lower())
+
+#         conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
+#         cur = conn.cursor()
+
+#         #check course
+#         executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
+
+#         cur.execute(executeString)
+#         if cur.fetchall():
+#             speech_output = ""
+            
+#             executeString = '''Select
+#             SUM(EnrollmentLimit) from CS1172Data where
+#             NUMBER = "%s" 
+#             ''' % (num)
+
+#             cur.execute(executeString)
+
+#             for val in cur:
+#                 offered = val[0]
+
+#             executeString = '''Select
+#             SUM(Enrollment) from CS1172Data where
+#             NUMBER = "%s" 
+
+#             ''' % (num)
+
+#             cur.execute(executeString)
+
+#             for val in cur:
+#                 taken = val[0]
+
+#             avail = offered - taken
+#             availStr = str(avail)
+
+#             #string = "There are " + str(three) + "seats available in course " + num
+#             string = "There are {0} seats available in course {1}".format(availStr, num)
+
+#             speech_output += string
+#             reprompt_text = ""
+
+#         cur.close()
+#         conn.close()
+
+#     return build_response(session_attributes, build_speechlet_response(
+#         card_title, speech_output, reprompt_text, should_end_session))
+
