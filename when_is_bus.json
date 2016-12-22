@@ -1,0 +1,24 @@
+{
+  "session": {
+    "sessionId": "SessionId.881e33b1-2bd6-4897-94ab-11275d0be1fe",
+    "application": {
+      "applicationId": "amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AEANRAFL2WPRXTW5JRIH6W3TBQ5ZFM73FEN2N2DXQPLO2V2CLP4ZI5VKHUZGKWBAKTFQT2U4IHLEFT7FVP2PD7GD77Z7WYIRBR4E3TYPS3HEGY3TPF3W5PGLULMTZDLS4ENGUGK2NIQZ6TVSGW2YXIV2UJVPBUZA5TFHEBFSXHAGVRY7QALE7S33FPSOJMQZ4J7SE6VIIKDI5CY"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.efccf4c5-1854-41b4-ad55-4e871d55ef90",
+    "locale": "en-US",
+    "timestamp": "2016-12-22T22:19:52Z",
+    "intent": {
+      "name": "GetNearestBus",
+      "slots": {}
+    }
+  },
+  "version": "1.0"
+}
