@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import unirest
 import logging
 
@@ -37,12 +37,21 @@ class TranslocController():
 		#gives us something like this: '2016-12-22T17:31:55-05:00'
 		#take off the time zone
 		next_time_formatted = next_arrival_time[:-6]
+		# its +5 hours in the utc format from transloc
+		time_zone = 5
 		#create a date time object from it
-		next_time_dtobj = datetime.strptime(next_time_formatted, '%Y-%m-%dT%H:%M:%S')
+		next_time_dtobj = datetime.datetime.strptime(next_time_formatted, '%Y-%m-%dT%H:%M:%S')
+		logging.debug('timenow(): ')
+		logging.debug(datetime.datetime.now())
 
-		timedelta = next_time_dtobj - datetime.now()
+		next_time_dtobj += datetime.timedelta(0,5*60)
+		logging.debug('next time - changed: ')
+		logging.debug(next_time_dtobj.now())
 
-		delta_mins = timedelta.seconds / 60
+		time_delta = next_time_dtobj - datetime.datetime.now()
+		logging.debug('timeDelta: ')
+		logging.debug(time_delta)
+		delta_mins = time_delta.seconds / 60
 		logging.debug('dmin: ')
 		logging.debug(delta_mins)
 		return delta_mins
