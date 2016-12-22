@@ -1,0 +1,28 @@
+"data": [
+    {
+      "long_name": "University of Virginia",
+      "language": "en",
+      "position": {
+        "lat": 38.039,
+        "lng": -78.5055
+      },
+      "name": "uva",
+      "short_name": "UVA",
+      "phone": "434-924-7711",
+      "url": "http://www.virginia.edu/parking/uts/",
+      "timezone": "America/New_York",
+      "bounding_box": [
+        {
+          "lat": 38.026,
+          "lng": -78.52
+        },
+        {
+          "lat": 38.052,
+          "lng": -78.491
+        }
+      ],
+      "agency_id": "347"
+    }
+  ],
+  "api_version": "1.2"
+}

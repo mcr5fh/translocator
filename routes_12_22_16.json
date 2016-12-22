@@ -1,0 +1,282 @@
+HTTP/1.1 200 OK
+Alt-Svc: clear
+Cache-Control: max-age=300, public
+Connection: keep-alive
+Content-Encoding: gzip
+Content-Length: 591
+Content-Type: application/json; charset=UTF-8
+Date: Thu, 22 Dec 2016 21:11:21 GMT
+Etag: W/"21f85406430f498f2ab64ff426f5c9e2baf20abb"
+Expires: Thu, 22 Dec 2016 21:16:21 GMT
+Server: Mashape/5.0.6
+Via: 1.1 google
+
+{
+  "rate_limit": 1,
+  "expires_in": 300,
+  "api_latest_version": "1.2",
+  "generated_on": "2016-12-22T21:11:21+00:00",
+  "data": {
+    "347": [
+      {
+        "description": "",
+        "short_name": "",
+        "route_id": "4003482",
+        "url": "",
+        "segments": [],
+        "is_active": false,
+        "agency_id": 347,
+        "text_color": "000000",
+        "long_name": "Special Route",
+        "stops": [],
+        "is_hidden": false,
+        "type": "bus",
+        "color": "ef00f7"
+      },
+      {
+        "description": "",
+        "short_name": "",
+        "route_id": "4003298",
+        "url": "",
+        "segments": [
+          [
+            "4048115",
+            "backward"
+          ],
+          [
+            "4048115",
+            "forward"
+          ],
+          [
+            "4048475",
+            "forward"
+          ],
+          [
+            "4067275",
+            "backward"
+          ],
+          [
+            "4072163",
+            "forward"
+          ],
+          [
+            "4072315",
+            "forward"
+          ],
+          [
+            "4072339",
+            "forward"
+          ],
+          [
+            "4074291",
+            "backward"
+          ],
+          [
+            "4074291",
+            "forward"
+          ],
+          [
+            "4074295",
+            "backward"
+          ],
+          [
+            "4074295",
+            "forward"
+          ],
+          [
+            "4076007",
+            "backward"
+          ],
+          [
+            "4082191",
+            "backward"
+          ],
+          [
+            "4082191",
+            "forward"
+          ],
+          [
+            "4106963",
+            "forward"
+          ],
+          [
+            "4106983",
+            "forward"
+          ],
+          [
+            "4107287",
+            "backward"
+          ],
+          [
+            "4107287",
+            "forward"
+          ],
+          [
+            "4122019",
+            "backward"
+          ],
+          [
+            "4122021",
+            "backward"
+          ]
+        ],
+        "is_active": true,
+        "agency_id": 347,
+        "text_color": "000000",
+        "long_name": "Stadium / Hospital Shuttle",
+        "stops": [
+          "4124046",
+          "4123862",
+          "4123858",
+          "4123754",
+          "4123926",
+          "4123930",
+          "4123914",
+          "4123942",
+          "4123902",
+          "4123950",
+          "4186280",
+          "4123938",
+          "4123906"
+        ],
+        "is_hidden": false,
+        "type": "bus",
+        "color": "ef83f2"
+      },
+      {
+        "description": "",
+        "short_name": "",
+        "route_id": "4003302",
+        "url": "",
+        "segments": [
+          [
+            "4047703",
+            "backward"
+          ],
+          [
+            "4047703",
+            "forward"
+          ],
+          [
+            "4047743",
+            "forward"
+          ],
+          [
+            "4047863",
+            "backward"
+          ],
+          [
+            "4048303",
+            "backward"
+          ],
+          [
+            "4048411",
+            "forward"
+          ],
+          [
+            "4072163",
+            "forward"
+          ],
+          [
+            "4072319",
+            "backward"
+          ],
+          [
+            "4072319",
+            "forward"
+          ],
+          [
+            "4074291",
+            "backward"
+          ],
+          [
+            "4074291",
+            "forward"
+          ],
+          [
+            "4074295",
+            "backward"
+          ],
+          [
+            "4074295",
+            "forward"
+          ],
+          [
+            "4082191",
+            "backward"
+          ],
+          [
+            "4082191",
+            "forward"
+          ],
+          [
+            "4085703",
+            "backward"
+          ],
+          [
+            "4085703",
+            "forward"
+          ],
+          [
+            "4085963",
+            "forward"
+          ],
+          [
+            "4106963",
+            "forward"
+          ],
+          [
+            "4122019",
+            "backward"
+          ],
+          [
+            "4122021",
+            "backward"
+          ],
+          [
+            "4125427",
+            "backward"
+          ],
+          [
+            "4137001",
+            "backward"
+          ],
+          [
+            "4137003",
+            "forward"
+          ],
+          [
+            "4140557",
+            "backward"
+          ]
+        ],
+        "is_active": true,
+        "agency_id": 347,
+        "text_color": "FFFFFF",
+        "long_name": "Green Route",
+        "stops": [
+          "4124062",
+          "4124058",
+          "4123982",
+          "4123826",
+          "4123842",
+          "4123818",
+          "4123834",
+          "4123902",
+          "4123950",
+          "4186280",
+          "4123938",
+          "4123906",
+          "4123822",
+          "4123838",
+          "4123894",
+          "4124050"
+        ],
+        "is_hidden": false,
+        "type": "bus",
+        "color": "5bad18"
+      }
+    ]
+  },
+  "api_version": "1.2"
+}
