@@ -72,16 +72,36 @@ def get_nearest_bus(intent):
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
 
+def configure_location(intent):
+    session_attributes = {}
+    card_title = "Translocator configure location"
+    speech_output = "The address you provided does not match the required format. Please try again."
+    reprompt_text = "Please provide a valid address. An example is 608 Preston Place, Charlottesville Virginia."
+    should_end_session = False
+
+    if "address" in intent["slots"]:
+        addr = intent["slots"]["address"]["value"]
+
+        ###########
+        #CODE HERE
+        ###########
+
+        speech_output = "The address you provided is " + addr
+
+    return build_response(session_attributes, build_speechlet_response(
+    card_title, speech_output, reprompt_text, should_end_session))
 
 def get_welcome_response():
+    bool first_time = True
     session_attributes = {}
-    card_title = "Louie"
-    speech_output = "Welcome to the Louie's UVA CS scheduling skill. " \
-                    "You can ask me when a cs class meets, or " \
-                    "ask me where it might meet. Finally, you can inquire how many" \
-                    "available seats there are in a particular class."
-    reprompt_text = "Please use the class's course number, and restrict your inquiries to those pertaining" \
-                    "to those in the UVA CS department."
+    card_title = "Translocator"
+    speech_output = "Welcome to the Translocator skill."
+    if first_time:
+        speech_output += "If this is your first time, configure your location using the " \
+        "'configure' keyword followed by your address."
+
+    reprompt_text = "You can ask when the next bus is coming to your nearest stop." \
+                    "You can also configure your device's location by saying configure followed by your address."
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
