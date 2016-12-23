@@ -8,6 +8,11 @@ import unirest
 #transloc API
 from translocController import TranslocController
 
+transController = TranslocController()
+#
+first_session = True
+
+
 def lambda_handler(event, context):
     if (event["session"]["application"]["applicationId"] !=
             "amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"):
@@ -65,9 +70,8 @@ def get_nearest_bus(intent):
     ###########
     #CODE HERE
     ##########
-    t = TranslocController()
     #hard coded
-    min_till_bus = t.get_next_bus_arrival(347, 4123822)
+    min_till_bus = transController.get_next_bus_arrival(347, 4123822)
 
     speech_output = "Next bus is in " + str(min_till_bus) + " minutes"
 
@@ -87,14 +91,19 @@ def configure_location(intent):
         ###########
         #CODE HERE
         ###########
-
-        speech_output = "The address you provided is " + addr
+        stop_list = transController.get_closest_stop("608 Preston Pl, Charlottesville, VA 22903")
+        if(len(stop_list) > 1):
+            ###########
+            #prompt for list
+            ###########
+        else:
+            #speech_output = "The address you provided is " + addr
+            speech_output = "Your stop is now set to" + stop_list[0]
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
 
 def get_welcome_response():
-    bool first_time = True
     session_attributes = {}
     card_title = "Translocator"
     speech_output = "Welcome to the Translocator skill."

@@ -1,25 +1,81 @@
 import datetime
 import unirest
 import logging
+import geocoder
 
 class TranslocController():
     local_address = ""
-
+    acgency_long_name = ""
     local_agency_id = -1
     local_route_number = -1
     local_stop_number = -1
+    local_stop_id = -1
+
+    local_nearby_stops = []
 
     def __init__(self):
         logging.basicConfig(filename='trans.log',level=logging.DEBUG)
 
+    def set_location(self, address):
+        #local_address = address
+
+        g = geocoder.google(address)
+        #<[OK] Google - Geocode [608 Preston Pl, Charlottesville, VA 22903, USA]>
+        # g.bbox
+        # {'northeast': [38.0429164802915, -78.49673836970848], 'southwest': [38.0402185197085, -78.49943633029149]}
+        
+        #just goes in order as you'd expect from the api
+
+        base_url = "https://transloc-api-1-2.p.mashape.com/agencies.json?callback=call&"
+        geo_area = "geo_area="+str(g.bbox['northeast'][0])+"%2C+"+ str(g.bbox['northeast'][1]) + "%7C" \
+                        + str(g.bbox['southwest'][0])+"%2C+"+ str(g.bbox['southwest'][1]) 
+
+        response = unirest.get(base_url + geo_area,
+          headers={
+            "X-Mashape-Key": "P5XVDHDhPEmshrYNeT29XndUunS4p1EPDrOjsnosBj9nVdvjit",
+            "Accept": "application/json"
+          }
+        )
+        print(response.body['data'][0]['long_name'])
+        print(response.body['data'][0]['agency_id'])
+        TranslocController.local_address = address
+        TranslocController.local_agency_id = response.body['data'][0]['agency_id']
+        TranslocController.acgency_long_name = response.body['data'][0]['long_name']
+
+    def get_closest_stop(self, address):
+        set_location_agency_id(address)
+        return get_closest_stop()
+
+    #Will return a list of strings of the stops in the vicinity
+    def get_closest_stop(self):
+        if(TranslocController.local_agency_id == -1):
+            logging.error('Agency id has not been set')
+            return -1
+
+        g = geocoder.google(TranslocController.local_address)
+        base_url = "https://transloc-api-1-2.p.mashape.com/stops.json?agencies=347&callback=call&"
+
+        geo_area = "geo_area="+str(g.bbox['northeast'][0])+"%2C+" \
+                        + str(g.bbox['northeast'][1]) + "%7C" \
+                        + str(g.bbox['southwest'][0])+"%2C+"  \
+                        + str(g.bbox['southwest'][1]) 
+
+        response = unirest.get(base_url + geo_area,
+          headers={
+            "X-Mashape-Key": "P5XVDHDhPEmshrYNeT29XndUunS4p1EPDrOjsnosBj9nVdvjit",
+            "Accept": "application/json"
+          }
+        )
+        stop_list = []
+        for stop_data in response.body['data']:
+            stop_list.append(stop_data['name'].encode('utf8'))
+        #logging.info(stop_list)
+        TranslocController.local_nearby_stops = stop_list
+        return stop_list
+
+
     #returns the minutes until the next bus
     def get_next_bus_arrival(self, agency_id, stop_num):
-#        logging.debug('agency_id: ')
-#        logging.debug(agency_id)
-
-#        logging.debug('stop_num: ')
-#        logging.debug(stop_num)
-
         base_url = "https://transloc-api-1-2.p.mashape.com/arrival-estimates.json?agencies="
         base_url += str(agency_id)
         base_url += "&callback=call&stops="
@@ -57,7 +113,7 @@ class TranslocController():
 #        logging.debug(delta_mins)
         return delta_mins
 
-    def set_agency_id(self, a_id):
+    def set_agency_id(self):
         local_agency_id = a_id
 
     def set_route_number(self, r_num):
