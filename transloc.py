@@ -76,7 +76,7 @@ def get_nearest_bus(intent):
     #hard coded
     min_till_bus = transController.get_next_bus_arrival(347, 4123822)
 
-    speech_output = "Next bus is in " + str(min_till_bus) + " minutes"
+    speech_output = "The next bus is in " + str(min_till_bus) + " minutes"
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
@@ -133,14 +133,15 @@ def get_option(intent):
     if "option" in intent["slots"]:
         speech_output = "option is a slot."
         option = intent["slots"]["option"]["value"]
+	option = int(option)
         stop_list = transController.get_closest_stop_list()
-        speech_output += " stop_list is " + str(len(stop_list)) + "entries long. "
+#        speech_output += " stop_list is " + str(len(stop_list)) + "entries long. provided option: " + option
         if option <= len(stop_list):
             #need the minus ones for indexing
             stop_name = stop_list[option-1]
-            speech_output = "You chose option " + option + ": " + stop_name
+            speech_output = "You chose option " + str(option) + ": " + stop_name
             #Added this
-            translocController.set_stop_id(option-1)
+            transController.set_stop_id(option-1)
 
 
 
