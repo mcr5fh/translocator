@@ -35,17 +35,17 @@ class TranslocController():
         #accesses the first (next arriving bus from the list)
         next_arrival_time = response.body['data'][0]['arrivals'][0]['arrival_at']
         #gives us something like this: '2016-12-22T17:31:55-05:00'
-        #take off the time zone
+        #take off the time zone: '-05:00'
         next_time_formatted = next_arrival_time[:-6]
         # its +5 hours in the utc format from transloc
-        #TODO: make this a class member
-        time_zone = 5
+        time_zone = next_arrival_time[-6:]
+        time_zone_offset = int(time_zone[1:3])
         #create a date time object from it
         next_time_dtobj = datetime.datetime.strptime(next_time_formatted, '%Y-%m-%dT%H:%M:%S')
 #        logging.debug('timenow(): ')
 #        logging.debug(datetime.datetime.now())
 
-        next_time_dtobj += datetime.timedelta(0,time_zone*60*60)
+        next_time_dtobj += datetime.timedelta(0,time_zone_offset*60*60)
 #        logging.debug('next time - changed: ')
 #        logging.debug(next_time_dtobj.now())
 
@@ -58,13 +58,14 @@ class TranslocController():
         return delta_mins
 
     def set_agency_id(self, a_id):
-        agency_id = a_id
+        local_agency_id = a_id
 
     def set_route_number(self, r_num):
-        route_number = r_num
+        local_route_number = r_num
 
     def set_stop_number(self, s_num):
-        stop_number = s_num
+        local_stop_number = s_num
+
 
 
 
