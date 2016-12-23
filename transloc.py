@@ -96,12 +96,54 @@ def configure_location(intent):
             ###########
             #prompt for list
             ###########
+
+            speech_output = "The following stops are available in your area: "
+            for index, val in enumerate(stop_list):
+                speech_output += "Option " + str(index) + ": " + val ", "
+
+            speech_output = speech_output[:-2]
+            speech_output += ". Select the desired option by saying 'option' and the corresponding number."
+
         else:
             #speech_output = "The address you provided is " + addr
             speech_output = "Your stop is now set to" + stop_list[0]
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
+
+def get_option(intent):
+    session_attributes = {}
+    card_title = "Translocator get option"
+    speech_output = "This was not a valid option. Please try again."
+    reprompt_text = "Please provide a valid option."
+    should_end_session = False
+
+    if "option" in intent["slots"]:
+        option = intent["slots"]["address"]["value"]
+
+        ###########
+        #CODE HERE
+        ###########
+        stop_list = transController.get_closest_stop("608 Preston Pl, Charlottesville, VA 22903")
+        if(len(stop_list) > 1):
+            ###########
+            #prompt for list
+            ###########
+
+            speech_output = "The following stops are available in your area: "
+            for index, val in enumerate(stop_list):
+                speech_output += "Option " + str(index) + ": " + val ", "
+
+            speech_output = speech_output[:-2]
+            speech_output += ". Select the desired option by saying 'option' and the corresponding number."
+
+        else:
+            #speech_output = "The address you provided is " + addr
+            speech_output = "Your stop is now set to" + stop_list[0]
+
+    return build_response(session_attributes, build_speechlet_response(
+    card_title, speech_output, reprompt_text, should_end_session))    
+
 
 def get_welcome_response():
     session_attributes = {}
