@@ -40,9 +40,9 @@ def on_intent(intent_request, session):
 
     if intent_name == "GetNearestBus":
         return get_nearest_bus(intent)
-    elif intent_name = "ConfigureLocation":
+    elif intent_name == "ConfigureLocation":
         return configure_location(intent)
-    elif intent_name = "GetOption":
+    elif intent_name == "GetOption":
         return get_option(intent)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
