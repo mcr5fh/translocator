@@ -4,18 +4,20 @@ import logging
 import geocoder
 
 class TranslocController():
-    local_address = ""
-    agency_long_name = ""
-    local_agency_id = -1
-    local_route_number = -1
-    local_stop_number = -1
-    local_stop_id = -1
-
-    local_nearby_stops = []
-    getting_options = False
 
     def __init__(self):
         logging.basicConfig(filename='trans.log',level=logging.DEBUG)
+        self.local_address = ""
+        self.agency_long_name = ""
+
+        self.local_agency_id = -1
+        self.local_route_number = -1
+        self.local_stop_id = -1
+        self.local_stop_id = -1
+
+        self.local_nearby_stops = []
+        self.local_nearby_stop_ids = []
+        self.getting_options = False
 
     def set_location(self, address):
         #local_address = address
@@ -38,21 +40,20 @@ class TranslocController():
         )
         # print(response.body['data'][0]['long_name'])
         # print(response.body['data'][0]['agency_id'])
-        TranslocController.local_address = address
-        TranslocController.local_agency_id = response.body['data'][0]['agency_id']
-        TranslocController.acgency_long_name = response.body['data'][0]['long_name']
-
-    def get_closest_stop(self, address):
-        set_location_agency_id(address)
-        return get_closest_stop()
+        self.local_address = address
+        self.local_agency_id = response.body['data'][0]['agency_id']
+        self.acgency_long_name = response.body['data'][0]['long_name']
 
     #Will return a list of strings of the stops in the vicinity
-    def get_closest_stop(self):
-        if(TranslocController.local_agency_id == -1):
+    def set_closest_stop(self, address = None):
+        if(address != None):
+            self.set_location(address)
+
+        if(self.local_agency_id == -1):
             logging.error('Agency id has not been set')
             return None
 
-        g = geocoder.google(TranslocController.local_address)
+        g = geocoder.google(self.local_address)
         base_url = "https://transloc-api-1-2.p.mashape.com/stops.json?agencies=347&callback=call&"
 
         geo_area = "geo_area="+str(g.bbox['northeast'][0])+"%2C+" \
@@ -66,13 +67,16 @@ class TranslocController():
             "Accept": "application/json"
           }
         )
-        stop_list = []
+        stop_list_str = []
+        stop_list_id = []
         for stop_data in response.body['data']:
-            stop_list.append(stop_data['name'].encode('utf8'))
+            stop_list_str.append(stop_data['name'].encode('utf8'))
+            stop_list_id.append(stop_data['stop_id'])
 
         #logging.info(stop_list)
-        TranslocController.local_nearby_stops = stop_list
-        return stop_list
+        self.local_nearby_stops = stop_list_str
+        self.local_nearby_stop_ids = stop_list_id
+        return stop_list_str
 
 
     #returns the minutes until the next bus
@@ -106,14 +110,22 @@ class TranslocController():
 
         return delta_mins
 
-    def set_agency_id(self):
-        local_agency_id = a_id
+# ---------- Getters and Setters ---------- 
 
-    def set_route_number(self, r_num):
-        local_route_number = r_num
+    def set_stop_id(self, stop_list_index):
+        self.local_stop_id = self.local_nearby_stop_ids[stop_list_index]
 
-    def set_stop_number(self, s_num):
-        local_stop_number = s_num
+    def get_agency_id(self):
+        return self.local_agency_id
+    
+    def get_route_number(self):
+        return self.local_route_number
+
+    def get_stop_id(self):
+        return self.local_stop_id
+
+    def get_closest_stop_list(self):
+        return self.local_nearby_stops
 
 
 

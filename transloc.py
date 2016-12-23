@@ -93,7 +93,7 @@ def configure_location(intent):
         ###########
         #CODE HERE
         ###########
-        stop_list = transController.get_closest_stop(addr)
+        stop_list = transController.set_closest_stop(addr)
         if(len(stop_list) > 1):
             ###########
             #prompt for list
@@ -125,11 +125,13 @@ def get_option(intent):
 
     if "option" in intent["slots"]:
         option = intent["slots"]["option"]["value"]
-
-        if option <= len(transController.local_nearby_stops):
-            stop_name = transController.local_nearby_stops[option]
+        stop_list = transController.get_closest_stop_list()
+        if option <= len(stop_list):
+            #need the minus ones for indexing
+            stop_name = stop_list[option-1]
             speech_output = "You chose option " + option + ": " + stop_name
-
+            #Added this
+            translocController.set_stop_id(option-1)
 
 
 
