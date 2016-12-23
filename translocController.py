@@ -18,7 +18,6 @@ class TranslocController():
 
     def set_location(self, address):
         #local_address = address
-
         g = geocoder.google(address)
         #<[OK] Google - Geocode [608 Preston Pl, Charlottesville, VA 22903, USA]>
         # g.bbox
@@ -36,8 +35,8 @@ class TranslocController():
             "Accept": "application/json"
           }
         )
-        print(response.body['data'][0]['long_name'])
-        print(response.body['data'][0]['agency_id'])
+        # print(response.body['data'][0]['long_name'])
+        # print(response.body['data'][0]['agency_id'])
         TranslocController.local_address = address
         TranslocController.local_agency_id = response.body['data'][0]['agency_id']
         TranslocController.acgency_long_name = response.body['data'][0]['long_name']
@@ -50,7 +49,7 @@ class TranslocController():
     def get_closest_stop(self):
         if(TranslocController.local_agency_id == -1):
             logging.error('Agency id has not been set')
-            return -1
+            return None
 
         g = geocoder.google(TranslocController.local_address)
         base_url = "https://transloc-api-1-2.p.mashape.com/stops.json?agencies=347&callback=call&"
@@ -69,6 +68,7 @@ class TranslocController():
         stop_list = []
         for stop_data in response.body['data']:
             stop_list.append(stop_data['name'].encode('utf8'))
+
         #logging.info(stop_list)
         TranslocController.local_nearby_stops = stop_list
         return stop_list
@@ -98,19 +98,11 @@ class TranslocController():
         time_zone_offset = int(time_zone[1:3])
         #create a date time object from it
         next_time_dtobj = datetime.datetime.strptime(next_time_formatted, '%Y-%m-%dT%H:%M:%S')
-#        logging.debug('timenow(): ')
-#        logging.debug(datetime.datetime.now())
-
         next_time_dtobj += datetime.timedelta(0,time_zone_offset*60*60)
-#        logging.debug('next time - changed: ')
-#        logging.debug(next_time_dtobj.now())
 
         time_delta = next_time_dtobj - datetime.datetime.now() 
-#        logging.debug('timeDelta: ')
-#        logging.debug(time_delta)
         delta_mins = time_delta.seconds / 60
-#        logging.debug('dmin: ')
-#        logging.debug(delta_mins)
+
         return delta_mins
 
     def set_agency_id(self):
