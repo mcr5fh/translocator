@@ -5,13 +5,14 @@ import geocoder
 
 class TranslocController():
     local_address = ""
-    acgency_long_name = ""
+    agency_long_name = ""
     local_agency_id = -1
     local_route_number = -1
     local_stop_number = -1
     local_stop_id = -1
 
     local_nearby_stops = []
+    getting_options = False
 
     def __init__(self):
         logging.basicConfig(filename='trans.log',level=logging.DEBUG)

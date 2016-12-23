@@ -42,6 +42,8 @@ def on_intent(intent_request, session):
         return get_nearest_bus(intent)
     elif intent_name = "ConfigureLocation":
         return configure_location(intent)
+    elif intent_name = "GetOption":
+        return get_option(intent)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
@@ -96,17 +98,20 @@ def configure_location(intent):
             ###########
             #prompt for list
             ###########
+            #set list in controller
+            transController.local_nearby_stops = stop_list
+            transController.getting_options = True
 
             speech_output = "The following stops are available in your area: "
             for index, val in enumerate(stop_list):
-                speech_output += "Option " + str(index) + ": " + val ", "
+                speech_output += "Option " + str(index + 1) + ": " + val ", "
 
             speech_output = speech_output[:-2]
-            speech_output += ". Select the desired option by saying 'option' and the corresponding number."
+            speech_output += ". Select the desired option by saying 'option' followed by the corresponding number."
 
         else:
             #speech_output = "The address you provided is " + addr
-            speech_output = "Your stop is now set to" + stop_list[0]
+            speech_output = "Your stop is now set to " + stop_list[0]
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
@@ -119,28 +124,17 @@ def get_option(intent):
     should_end_session = False
 
     if "option" in intent["slots"]:
-        option = intent["slots"]["address"]["value"]
+        option = intent["slots"]["option"]["value"]
 
-        ###########
-        #CODE HERE
-        ###########
-        stop_list = transController.get_closest_stop("608 Preston Pl, Charlottesville, VA 22903")
-        if(len(stop_list) > 1):
-            ###########
-            #prompt for list
-            ###########
+        if option <= len(transController.local_nearby_stops):
+            stop_name = transController.local_nearby_stops[option]
+            speech_output = "You chose option " + option ": " + stop_name
 
-            speech_output = "The following stops are available in your area: "
-            for index, val in enumerate(stop_list):
-                speech_output += "Option " + str(index) + ": " + val ", "
 
-            speech_output = speech_output[:-2]
-            speech_output += ". Select the desired option by saying 'option' and the corresponding number."
 
-        else:
-            #speech_output = "The address you provided is " + addr
-            speech_output = "Your stop is now set to" + stop_list[0]
 
+
+        
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))    
 
