@@ -40,9 +40,9 @@ def on_intent(intent_request, session):
 
     if intent_name == "GetNearestBus":
         return get_nearest_bus(intent)
-    elif intent_name = "ConfigureLocation":
+    elif intent_name == "ConfigureLocation":
         return configure_location(intent)
-    elif intent_name = "GetOption":
+    elif intent_name == "GetOption":
         return get_option(intent)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
@@ -93,7 +93,7 @@ def configure_location(intent):
         ###########
         #CODE HERE
         ###########
-        stop_list = transController.get_closest_stop("608 Preston Pl, Charlottesville, VA 22903")
+        stop_list = transController.get_closest_stop(addr)
         if(len(stop_list) > 1):
             ###########
             #prompt for list
@@ -104,7 +104,7 @@ def configure_location(intent):
 
             speech_output = "The following stops are available in your area: "
             for index, val in enumerate(stop_list):
-                speech_output += "Option " + str(index + 1) + ": " + val ", "
+                speech_output += "Option " + str(index + 1) + ": " + val + ", "
 
             speech_output = speech_output[:-2]
             speech_output += ". Select the desired option by saying 'option' followed by the corresponding number."
@@ -128,7 +128,7 @@ def get_option(intent):
 
         if option <= len(transController.local_nearby_stops):
             stop_name = transController.local_nearby_stops[option]
-            speech_output = "You chose option " + option ": " + stop_name
+            speech_output = "You chose option " + option + ": " + stop_name
 
 
 
