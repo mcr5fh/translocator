@@ -134,7 +134,7 @@ def get_option(intent):
         speech_output = "option is a slot."
         option = intent["slots"]["option"]["value"]
         stop_list = transController.get_closest_stop_list()
-        speech_output += " stop_list is " + len(stop_list) + "entries long. "
+        speech_output += " stop_list is " + str(len(stop_list)) + "entries long. "
         if option <= len(stop_list):
             #need the minus ones for indexing
             stop_name = stop_list[option-1]
