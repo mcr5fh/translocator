@@ -3,7 +3,6 @@ import unirest
 import logging
 
 class TranslocController():
-<<<<<<< HEAD
     local_address = ""
 
     local_agency_id = -1
@@ -15,11 +14,11 @@ class TranslocController():
 
     #returns the minutes until the next bus
     def get_next_bus_arrival(self, agency_id, stop_num):
-        logging.debug('agency_id: ')
-        logging.debug(agency_id)
+#        logging.debug('agency_id: ')
+#        logging.debug(agency_id)
 
-        logging.debug('stop_num: ')
-        logging.debug(stop_num)
+#        logging.debug('stop_num: ')
+#        logging.debug(stop_num)
 
         base_url = "https://transloc-api-1-2.p.mashape.com/arrival-estimates.json?agencies="
         base_url += str(agency_id)
@@ -43,20 +42,19 @@ class TranslocController():
         time_zone = 5
         #create a date time object from it
         next_time_dtobj = datetime.datetime.strptime(next_time_formatted, '%Y-%m-%dT%H:%M:%S')
-        logging.debug('timenow(): ')
-        logging.debug(datetime.datetime.now())
+#        logging.debug('timenow(): ')
+#        logging.debug(datetime.datetime.now())
 
-        next_time_dtobj += datetime.timedelta(0,5*60)
-        logging.debug('next time - changed: ')
-        logging.debug(next_time_dtobj.now())
+        next_time_dtobj += datetime.timedelta(0,time_zone*60*60)
+#        logging.debug('next time - changed: ')
+#        logging.debug(next_time_dtobj.now())
 
-        #time_delta = next_time_dtobj - datetime.datetime.now()
-        time_delta =  datetime.datetime.now() - next_time_dtobj 
-        logging.debug('timeDelta: ')
-        logging.debug(time_delta)
+        time_delta = next_time_dtobj - datetime.datetime.now() 
+#        logging.debug('timeDelta: ')
+#        logging.debug(time_delta)
         delta_mins = time_delta.seconds / 60
-        logging.debug('dmin: ')
-        logging.debug(delta_mins)
+#        logging.debug('dmin: ')
+#        logging.debug(delta_mins)
         return delta_mins
 
     def set_agency_id(self, a_id):
