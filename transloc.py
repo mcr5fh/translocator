@@ -124,6 +124,12 @@ def get_option(intent):
     reprompt_text = "Please provide a valid option."
     should_end_session = False
 
+    if transController.getting_options = False:
+        speech_output = "Please start by using the keyword configure."
+
+        return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))    
+
     if "option" in intent["slots"]:
         option = intent["slots"]["option"]["value"]
         stop_list = transController.get_closest_stop_list()
