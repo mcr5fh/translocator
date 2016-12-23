@@ -54,6 +54,7 @@ def on_intent(intent_request, session):
 def on_session_ended(session_ended_request, session):
     print "Ending session."
     # Cleanup goes here...
+    
 
 def handle_session_end_request():
     card_title = "Translocator - Thanks"
