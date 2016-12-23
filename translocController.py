@@ -3,6 +3,7 @@ import unirest
 import logging
 
 class TranslocController():
+<<<<<<< HEAD
     local_address = ""
 
     local_agency_id = -1
@@ -66,5 +67,6 @@ class TranslocController():
 
     def set_stop_number(self, s_num):
         stop_number = s_num
+
 
 
