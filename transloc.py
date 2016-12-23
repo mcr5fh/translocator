@@ -107,8 +107,8 @@ def get_welcome_response():
     session_attributes = {}
     card_title = "Translocator"
     speech_output = "Welcome to the Translocator skill."
-    if first_time:
-        speech_output += "If this is your first time, configure your location using the " \
+    if first_session:
+        speech_output += "Configure your device's location using the " \
         "'configure' keyword followed by your address."
 
     reprompt_text = "You can ask when the next bus is coming to your nearest stop." \
