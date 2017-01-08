@@ -70,11 +70,19 @@ def get_nearest_bus(intent):
     reprompt_text = "I'm not sure what you're asking for. "
     should_end_session = False
 
-    ###########
-    #CODE HERE
-    ##########
-    #hard coded
-    min_till_bus = transController.get_next_bus_arrival(347, 4123822)
+    #Transloc 
+    agency_id = translocController.get_agency_id()
+    stop_id = translocController.get_stop_id() 
+    
+    #Make sure everything is configured
+    if(agency_id == -1 or stop_id == -1):
+        speech_output = "An error has occured in finding your stop. Please configure location"
+        return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
+    #sample data
+    # min_till_bus = transController.get_next_bus_arrival(347, 4123822)
+    min_till_bus = transController.get_next_bus_arrival(agency_id, stop_id)
 
     speech_output = "The next bus is in " + str(min_till_bus) + " minutes"
 
@@ -91,17 +99,12 @@ def configure_location(intent):
     if "address" in intent["slots"]:
         addr = intent["slots"]["address"]["value"]
 
-        ###########
-        #CODE HERE
-        ###########
         stop_list = transController.set_closest_stop(addr)
         if(len(stop_list) > 1):
-            ###########
-            #prompt for list
-            ###########
             #set list in controller
-            transController.local_nearby_stops = stop_list
-            transController.getting_options = True
+
+            #shouldnt need this transController.local_nearby_stops = stop_list
+            transController.set_getting_options(True)
 
             speech_output = "The following stops are available in your area: "
             for index, val in enumerate(stop_list):
@@ -124,7 +127,7 @@ def get_option(intent):
     reprompt_text = "Please provide a valid option."
     should_end_session = False
 
-    if transController.getting_options == False:
+    if transController.get_getting_options() == False:
         speech_output = "Please start by using the keyword configure."
 
         return build_response(session_attributes, build_speechlet_response(
@@ -133,7 +136,7 @@ def get_option(intent):
     if "option" in intent["slots"]:
         speech_output = "option is a slot."
         option = intent["slots"]["option"]["value"]
-	option = int(option)
+	    option = int(option)
         stop_list = transController.get_closest_stop_list()
 #        speech_output += " stop_list is " + str(len(stop_list)) + "entries long. provided option: " + option
         if option <= len(stop_list):
@@ -143,10 +146,6 @@ def get_option(intent):
             #Added this
             transController.set_stop_id(option-1)
 
-
-
-
-        
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))    
 

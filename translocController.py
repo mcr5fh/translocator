@@ -111,6 +111,11 @@ class TranslocController():
         return delta_mins
 
 # ---------- Getters and Setters ---------- 
+    def get_getting_options(self, status):
+        return self.getting_options
+
+    def set_getting_options(self, status):
+        self.getting_options = status
 
     def set_stop_id(self, stop_list_index):
         self.local_stop_id = self.local_nearby_stop_ids[stop_list_index]
@@ -118,9 +123,6 @@ class TranslocController():
     def get_agency_id(self):
         return self.local_agency_id
     
-    def get_route_number(self):
-        return self.local_route_number
-
     def get_stop_id(self):
         return self.local_stop_id
 
