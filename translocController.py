@@ -111,7 +111,7 @@ class TranslocController():
         return delta_mins
 
 # ---------- Getters and Setters ---------- 
-    def get_getting_options(self, status):
+    def get_getting_options(self):
         return self.getting_options
 
     def set_getting_options(self, status):

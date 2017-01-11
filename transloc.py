@@ -12,11 +12,11 @@ transController = TranslocController()
 #
 first_session = True
 
+#"amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"): - logan's
 
 def lambda_handler(event, context):
-    if (event["session"]["application"]["applicationId"] !=
-            "amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"):
-        raise ValueError("Invalid Application ID")
+    if (event["session"]["application"]["applicationId"] != "amzn1.ask.skill.b9945778-9da9-4879-a534-97309608acae"):
+        raise ValueError("Invalid Application ID: ", event["session"]["application"]["applicationId"])
     
     if event["session"]["new"]:
         on_session_started({"requestId": event["request"]["requestId"]}, event["session"])
@@ -136,9 +136,9 @@ def get_option(intent):
     if "option" in intent["slots"]:
         speech_output = "option is a slot."
         option = intent["slots"]["option"]["value"]
-	    option = int(option)
+        option = int(option)
         stop_list = transController.get_closest_stop_list()
-#        speech_output += " stop_list is " + str(len(stop_list)) + "entries long. provided option: " + option
+#       speech_output += " stop_list is " + str(len(stop_list)) + "entries long. provided option: " + option
         if option <= len(stop_list):
             #need the minus ones for indexing
             stop_name = stop_list[option-1]
