@@ -29,6 +29,9 @@ dynamoClient = DynamoClient("TranslocatorUserInfo")
 
 
 dynamoClient.store_agency_route_stop("ABC", 123, 456, 789)
-print dynamoClient.get_route_info("ABC")
+success, info = dynamoClient.get_route_info("ABC")
+print info['route']
+print dynamoClient.get_route_info("B")
+
     
            

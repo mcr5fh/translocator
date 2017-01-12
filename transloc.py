@@ -15,10 +15,9 @@ first_session = True
 mySkillId = "amzn1.ask.skill.b9945778-9da9-4879-a534-97309608acae"
 
 ####################################################################
-transController = TranslocController()
+translocController = TranslocController()
 dynamoClient = DynamoClient(tableName)
-
-
+dynamo_table_key = ""
 #"amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"): - logan's
 
 def lambda_handler(event, context):
@@ -45,19 +44,26 @@ def on_intent(intent_request, session):
     intent = intent_request["intent"]
     intent_name = intent_request["intent"]["name"]
 
-    if first_session:
-        dynamo_table_key = session["user"]["userId"]
-        dynamoClient = DynamoClient(tableName)
-        #check and or set first session could just make a function to catch the except.
-        #make this get(uid) if error, then we have to setup, otherwise, were fine
+    global dynamo_table_key
+    dynamo_table_key = session["user"]["userId"]
+
+    #check and or set first session could just make a function to catch the except.
+    #make this get(uid) if error, then we have to setup, otherwise, were fine
 
     if intent_name == "GetNearestBus":
+        query_success, user_info = dynamoClient.get_route_info(dynamo_table_key)
+        if query_success:
+            translocController.set_agency_id(user_info['agency_id'])
+            translocController.set_stop_id(user_info['stop_id'])
         return get_nearest_bus(intent)
     elif intent_name == "ConfigureLocation":
         return configure_location(intent)
     elif intent_name == "GetOption":
         return get_option(intent)
     elif intent_name == "AMAZON.HelpIntent":
+        query_success, user_info = dynamoClient.get_route_info(dynamo_table_key)
+        if query_success:
+            first_session = False
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
@@ -81,7 +87,7 @@ def get_nearest_bus(intent):
     card_title = "Transloc nearest bus time"
     speech_output = "You're trying to get a bus time. Awesome."
     reprompt_text = "I'm not sure what you're asking for. "
-    should_end_session = False
+    should_end_session = True #changed this from False
 
     #Transloc 
     agency_id = translocController.get_agency_id()
@@ -94,8 +100,8 @@ def get_nearest_bus(intent):
         card_title, speech_output, reprompt_text, should_end_session))
 
     #sample data
-    # min_till_bus = transController.get_next_bus_arrival(347, 4123822)
-    min_till_bus = transController.get_next_bus_arrival(agency_id, stop_id)
+    # min_till_bus = translocController.get_next_bus_arrival(347, 4123822)
+    min_till_bus = translocController.get_next_bus_arrival(agency_id, stop_id)
 
     speech_output = "The next bus is in " + str(min_till_bus) + " minutes"
 
@@ -112,12 +118,12 @@ def configure_location(intent):
     if "address" in intent["slots"]:
         addr = intent["slots"]["address"]["value"]
 
-        stop_list = transController.set_closest_stop(addr)
+        stop_list = translocController.set_closest_stop(addr)
         if(len(stop_list) > 1):
             #set list in controller
 
-            #shouldnt need this transController.local_nearby_stops = stop_list
-            transController.set_getting_options(True)
+            #shouldnt need this translocController.local_nearby_stops = stop_list
+            translocController.set_getting_options(True)
 
             speech_output = "The following stops are available in your area: "
             for index, val in enumerate(stop_list):
@@ -126,9 +132,12 @@ def configure_location(intent):
             speech_output = speech_output[:-2]
             speech_output += ". Select the desired option by saying 'option' followed by the corresponding number."
 
-        else:
+        elif (len(stop_list) == 0):
             #speech_output = "The address you provided is " + addr
             speech_output = "Your stop is now set to " + stop_list[0]
+        else: 
+            speech_output = "There was an error configuring your stop"
+            should_end_session = True
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
@@ -140,7 +149,7 @@ def get_option(intent):
     reprompt_text = "Please provide a valid option."
     should_end_session = False
 
-    if transController.get_getting_options() == False:
+    if translocController.get_getting_options() == False:
         speech_output = "Please start by using the keyword configure."
 
         return build_response(session_attributes, build_speechlet_response(
@@ -150,18 +159,19 @@ def get_option(intent):
         speech_output = "option is a slot."
         option = intent["slots"]["option"]["value"]
         option = int(option)
-        stop_list = transController.get_closest_stop_list()
+        stop_list = translocController.get_closest_stop_list()
 #       speech_output += " stop_list is " + str(len(stop_list)) + "entries long. provided option: " + option
         if option <= len(stop_list):
             #need the minus ones for indexing
             stop_name = stop_list[option-1]
             speech_output = "You chose option " + str(option) + ": " + stop_name
             #Added this
-            transController.set_stop_id(option-1)
+            translocController.set_stop_id_from_stop_list(option-1)
 
             #store the location data
-            dynamoClient.store_agency_route_stop(dynamo_table_key, transController.get_agency_id(), 
-                                                transController.get_route_id(), stop_name):
+            if not dynamoClient.store_agency_route_stop(dynamo_table_key, translocController.get_agency_id(), 
+                translocController.get_stop_id(), stop_name):
+                speech_output = "There was an error choosing the option: " + stop_name
 
 
     return build_response(session_attributes, build_speechlet_response(
@@ -171,7 +181,7 @@ def get_option(intent):
 def get_welcome_response():
     session_attributes = {}
     card_title = "Translocator"
-    speech_output = "Welcome to the Translocator skill."
+    speech_output = "Welcome to the Translocator skill. "
     if first_session:
         speech_output += "Configure your device's location using the " \
         "'configure' keyword, followed by your address."

@@ -55,11 +55,15 @@ class TranslocController():
 
         g = geocoder.google(self.local_address)
         base_url = "https://transloc-api-1-2.p.mashape.com/stops.json?agencies=347&callback=call&"
-
-        geo_area = "geo_area="+str(g.bbox['northeast'][0])+"%2C+" \
-                        + str(g.bbox['northeast'][1]) + "%7C" \
-                        + str(g.bbox['southwest'][0])+"%2C+"  \
-                        + str(g.bbox['southwest'][1]) 
+        try: 
+            geo_area = "geo_area="+str(g.bbox['northeast'][0])+"%2C+" \
+                            + str(g.bbox['northeast'][1]) + "%7C" \
+                            + str(g.bbox['southwest'][0])+"%2C+"  \
+                            + str(g.bbox['southwest'][1]) 
+        except Exception as e:
+            print(e.response['Error']['Message'])
+            print address
+            return []
 
         response = unirest.get(base_url + geo_area,
           headers={
@@ -117,14 +121,20 @@ class TranslocController():
     def set_getting_options(self, status):
         self.getting_options = status
 
-    def set_stop_id(self, stop_list_index):
+    def set_stop_id_from_stop_list(self, stop_list_index):
         self.local_stop_id = self.local_nearby_stop_ids[stop_list_index]
+
+    def set_stop_id(self, stop_id):
+        self.local_stop_id = stop_id
+
+    def get_stop_id(self):
+        return self.local_stop_id
+
+    def set_agency_id(self, a_id):
+        self.local_agency_id = a_id
 
     def get_agency_id(self):
         return self.local_agency_id
-    
-    def get_stop_id(self):
-        return self.local_stop_id
 
     def get_closest_stop_list(self):
         return self.local_nearby_stops

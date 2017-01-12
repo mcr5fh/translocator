@@ -12,17 +12,30 @@ class DynamoClient():
         self.dynamodb = dynamodb = boto3.resource('dynamodb',endpoint_url="https://dynamodb.us-east-1.amazonaws.com") 
         self.table = self.dynamodb.Table(tableName)
 
-    def store_agency_route_stop(self, key, agency_id, route_id, stop_name):
-        response = self.table.put_item(
-            Item={
-                'uid': key, #pk
-                'agency': agency_id,
-                'route': route_id,
-                'stop_name': stop_name
-            }
-        )
+    def store_agency_route_stop(self, key, agency_id, stop_id, stop_name):
+        # if stop_name == "":
+        print key, #pk
+        print agency_id,
+        print stop_id,
+        print stop_name
+        #stop_name = "temp"
 
-    #return a dictionary of route info
+        try: 
+            response = self.table.put_item(
+                Item={
+                    'uid': key, #pk
+                    'agency_id': agency_id,
+                    'stop_id': stop_id,
+                    'stop_name': stop_name
+                }
+            )
+        except Exception as e:
+            print(e.response['Error']['Message'])
+            return False
+        else:
+            return True
+
+    #return a dictionary of route info on success
     def get_route_info(self, key):
         try:
             response = self.table.get_item(
@@ -33,5 +46,8 @@ class DynamoClient():
         except ClientError as e:
             print(e.response['Error']['Message'])
         else:
-            return response['Item']
+            if 'Item' in response:
+                return True, response['Item']
+            else: 
+                return False, None
 
