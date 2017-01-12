@@ -4,18 +4,25 @@ import json
 #import re
 import unirest
 #pymysql.install_as_MySQLdb()
-
+#for dynamoDB
+from dynamoClient import DynamoClient
 #transloc API
 from translocController import TranslocController
+####################################################################
 
-transController = TranslocController()
-#
+tableName = "TranslocatorUserInfo"
 first_session = True
+mySkillId = "amzn1.ask.skill.b9945778-9da9-4879-a534-97309608acae"
+
+####################################################################
+transController = TranslocController()
+dynamoClient = DynamoClient(tableName)
+
 
 #"amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"): - logan's
 
 def lambda_handler(event, context):
-    if (event["session"]["application"]["applicationId"] != "amzn1.ask.skill.b9945778-9da9-4879-a534-97309608acae"):
+    if (event["session"]["application"]["applicationId"] != mySkillId):
         raise ValueError("Invalid Application ID: ", event["session"]["application"]["applicationId"])
     
     if event["session"]["new"]:
@@ -37,6 +44,12 @@ def on_launch(launch_request, session):
 def on_intent(intent_request, session):
     intent = intent_request["intent"]
     intent_name = intent_request["intent"]["name"]
+
+    if first_session:
+        dynamo_table_key = session["user"]["userId"]
+        dynamoClient = DynamoClient(tableName)
+        #check and or set first session could just make a function to catch the except.
+        #make this get(uid) if error, then we have to setup, otherwise, were fine
 
     if intent_name == "GetNearestBus":
         return get_nearest_bus(intent)
@@ -146,6 +159,11 @@ def get_option(intent):
             #Added this
             transController.set_stop_id(option-1)
 
+            #store the location data
+            dynamoClient.store_agency_route_stop(dynamo_table_key, transController.get_agency_id(), 
+                                                transController.get_route_id(), stop_name):
+
+
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))    
 
@@ -156,7 +174,7 @@ def get_welcome_response():
     speech_output = "Welcome to the Translocator skill."
     if first_session:
         speech_output += "Configure your device's location using the " \
-        "'configure' keyword followed by your address."
+        "'configure' keyword, followed by your address."
 
     reprompt_text = "You can ask when the next bus is coming to your nearest stop." \
                     "You can also configure your device's location by saying configure followed by your address."
