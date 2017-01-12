@@ -1,23 +1,21 @@
 import urllib2
 import json
-#import pymysql
-#import re
 import unirest
-#pymysql.install_as_MySQLdb()
 #for dynamoDB
 from dynamoClient import DynamoClient
 #transloc API
 from translocController import TranslocController
-####################################################################
+########################## Globals ##################################
 
 tableName = "TranslocatorUserInfo"
 first_session = True
 mySkillId = "amzn1.ask.skill.b9945778-9da9-4879-a534-97309608acae"
+dynamo_table_key = ""
 
-####################################################################
 translocController = TranslocController()
 dynamoClient = DynamoClient(tableName)
-dynamo_table_key = ""
+####################################################################
+
 #"amzn1.ask.skill.7a1c9174-26ed-4dcb-a02d-8be0b35a6947"): - logan's
 
 def lambda_handler(event, context):
@@ -63,6 +61,7 @@ def on_intent(intent_request, session):
     elif intent_name == "AMAZON.HelpIntent":
         query_success, user_info = dynamoClient.get_route_info(dynamo_table_key)
         if query_success:
+            global first_session
             first_session = False
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
@@ -87,7 +86,7 @@ def get_nearest_bus(intent):
     card_title = "Transloc nearest bus time"
     speech_output = "You're trying to get a bus time. Awesome."
     reprompt_text = "I'm not sure what you're asking for. "
-    should_end_session = True #changed this from False
+    should_end_session = True 
 
     #Transloc 
     agency_id = translocController.get_agency_id()
@@ -121,8 +120,6 @@ def configure_location(intent):
         stop_list = translocController.set_closest_stop(addr)
         if(len(stop_list) > 1):
             #set list in controller
-
-            #shouldnt need this translocController.local_nearby_stops = stop_list
             translocController.set_getting_options(True)
 
             speech_output = "The following stops are available in your area: "
@@ -132,11 +129,11 @@ def configure_location(intent):
             speech_output = speech_output[:-2]
             speech_output += ". Select the desired option by saying 'option' followed by the corresponding number."
 
-        elif (len(stop_list) == 0):
+        elif len(stop_list) == 1:
             #speech_output = "The address you provided is " + addr
             speech_output = "Your stop is now set to " + stop_list[0]
         else: 
-            speech_output = "There was an error configuring your stop"
+            speech_output = "There was an error configuring your stop. Please try again."
             should_end_session = True
 
     return build_response(session_attributes, build_speechlet_response(
@@ -164,9 +161,9 @@ def get_option(intent):
         if option <= len(stop_list):
             #need the minus ones for indexing
             stop_name = stop_list[option-1]
-            speech_output = "You chose option " + str(option) + ": " + stop_name
-            #Added this
             translocController.set_stop_id_from_stop_list(option-1)
+
+            speech_output = "You chose option " + str(option) + ": " + stop_name
 
             #store the location data
             if not dynamoClient.store_agency_route_stop(dynamo_table_key, translocController.get_agency_id(), 
@@ -219,190 +216,3 @@ def build_response(session_attributes, speechlet_response):
         "sessionAttributes": session_attributes,
         "response": speechlet_response
     }
-
-# def course_when(intent):
-#     session_attributes = {}
-#     card_title = "LOUIE course times"
-#     speech_output = "I'm not sure which course you wanted. " \
-#                     "Please try again."
-#     reprompt_text = "I'm not sure which course you wanted. " \
-#                     "Try asking about Four thousand seven hundred forty for example."
-#     should_end_session = False
-
-
-#     if "coursenum" in intent["slots"]:
-#         course_num = intent["slots"]["coursenum"]["value"]
-
-#         course_num_s = course_num.encode('utf8')
-#         num = re.sub('[,]', '', course_num_s)
-#         #station_code = get_station_code(station_name.lower())
-
-#         conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
-#         cur = conn.cursor()
-
-#         #check course
-#         executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
-
-#         cur.execute(executeString)
-#         if cur.fetchall():
-#             speech_output = ""
-#             executeString = '''Select
-#                 DISTINCT Days
-#                 from CS1172Data where
-#                 NUMBER = "%s"
-
-#                 ''' % (num)
-
-#             cur.execute(executeString)
-
-#             string = "course " + num + " meets at the following times: "
-#             count = 0
-#             for (meetingTime) in cur:
-#                 first = meetingTime[0]
-#                 #do some string manipulation
-#                 first = re.sub('(Tu)', 'Tuesday ', first)
-#                 first = re.sub('(Th)', 'Thursday ', first)
-#                 first = re.sub('(Mo)', 'Monday ', first)
-#                 first = re.sub('(We)', 'Wednesday ', first)
-#                 first = re.sub('(Fr)', 'Friday ', first)
-#                 first = re.sub('( - )', ' to ', first)
-#                 if(count !=0):
-#                     string += ",  {" + first + "}"
-#                 else:
-#                     string += "{" + first + "}"
-#                 count = count + 1
-
-
-#             speech_output += string
-#             reprompt_text = ""
-
-#         cur.close()
-#         conn.close()
-
-#     return build_response(session_attributes, build_speechlet_response(
-#         card_title, speech_output, reprompt_text, should_end_session))
-
-# def course_where(intent):
-#     session_attributes = {}
-#     card_title = "LOUIE course locations"
-#     speech_output = "I'm not sure which course you wanted. " \
-#                     "Please try again."
-#     reprompt_text = "I'm not sure which course you wanted. " \
-#                     "Try asking about Four thousand seven hundred forty for example."
-#     should_end_session = False
-
-
-#     if "coursenum" in intent["slots"]:
-#         course_num = intent["slots"]["coursenum"]["value"]
-
-#         course_num_s = course_num.encode('utf8')
-#         num = re.sub('[,]', '', course_num_s)
-#         #station_code = get_station_code(station_name.lower())
-
-#         conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
-#         cur = conn.cursor()
-
-#         #check course
-#         executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
-
-#         cur.execute(executeString)
-#         if cur.fetchall():
-#             speech_output = ""
-#             executeString = '''Select
-#                 DISTINCT Room
-#                 from CS1172Data where
-#                 NUMBER = "%s"
-
-#                 ''' % (num)
-
-#             cur.execute(executeString)
-
-#             string = "course " + num + " meets at the following locations: "
-#             count = 0
-#             for (meetingTime) in cur:
-#                 first = meetingTime[0]
-                
-#                 first = re.sub('(Bldg)', 'Building', first)
-#                 first = re.sub('(Engr)', 'Engineering', first)
-
-
-#                 if(count !=0):
-#                     string += ",  {" + first + "}"
-#                 else:
-#                     string += "{" + first + "}"
-#                 count = count + 1
-
-
-#             speech_output += string
-#             reprompt_text = ""
-
-#         cur.close()
-#         conn.close()
-
-#     return build_response(session_attributes, build_speechlet_response(
-#         card_title, speech_output, reprompt_text, should_end_session))
-
-# def course_seats(intent):
-#     session_attributes = {}
-#     card_title = "LOUIE course locations"
-#     speech_output = "I'm not sure which course you wanted. " \
-#                     "Please try again."
-#     reprompt_text = "I'm not sure which course you wanted. " \
-#                     "Try asking about Four thousand seven hundred forty for example."
-#     should_end_session = False
-
-
-#     if "coursenum" in intent["slots"]:
-#         course_num = intent["slots"]["coursenum"]["value"]
-
-#         course_num_s = course_num.encode('utf8')
-#         num = re.sub('[,]', '', course_num_s)
-
-#         #station_code = get_station_code(station_name.lower())
-
-#         conn = pymysql.connect(host='uvaclasses.martyhumphrey.info', port=3306, user='UVAClasses', passwd='WR6V2vxjBbqNqbts', db='uvaclasses')
-#         cur = conn.cursor()
-
-#         #check course
-#         executeString = '''Select 1 from CS1172Data where number = "%s" ''' % (num)
-
-#         cur.execute(executeString)
-#         if cur.fetchall():
-#             speech_output = ""
-            
-#             executeString = '''Select
-#             SUM(EnrollmentLimit) from CS1172Data where
-#             NUMBER = "%s" 
-#             ''' % (num)
-
-#             cur.execute(executeString)
-
-#             for val in cur:
-#                 offered = val[0]
-
-#             executeString = '''Select
-#             SUM(Enrollment) from CS1172Data where
-#             NUMBER = "%s" 
-
-#             ''' % (num)
-
-#             cur.execute(executeString)
-
-#             for val in cur:
-#                 taken = val[0]
-
-#             avail = offered - taken
-#             availStr = str(avail)
-
-#             #string = "There are " + str(three) + "seats available in course " + num
-#             string = "There are {0} seats available in course {1}".format(availStr, num)
-
-#             speech_output += string
-#             reprompt_text = ""
-
-#         cur.close()
-#         conn.close()
-
-#     return build_response(session_attributes, build_speechlet_response(
-#         card_title, speech_output, reprompt_text, should_end_session))
-

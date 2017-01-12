@@ -13,12 +13,6 @@ class DynamoClient():
         self.table = self.dynamodb.Table(tableName)
 
     def store_agency_route_stop(self, key, agency_id, stop_id, stop_name):
-        # if stop_name == "":
-        print key, #pk
-        print agency_id,
-        print stop_id,
-        print stop_name
-        #stop_name = "temp"
 
         try: 
             response = self.table.put_item(
@@ -31,11 +25,15 @@ class DynamoClient():
             )
         except Exception as e:
             print(e.response['Error']['Message'])
+            print key, #pk
+            print agency_id,
+            print stop_id,
+            print stop_name
             return False
         else:
             return True
 
-    #return a dictionary of route info on success
+    #return a tuple of success, dictionary of route info
     def get_route_info(self, key):
         try:
             response = self.table.get_item(
