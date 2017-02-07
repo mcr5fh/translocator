@@ -1,3 +1,4 @@
+echo "Make sure you are uploading from the proper virtual enviroment!!!"
 echo "Bundling code..."
 ./bundle.sh > /dev/null 2>&1
 echo "Bundled."

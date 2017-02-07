@@ -9,13 +9,14 @@ import json
 class DynamoClient():
 
     def __init__(self, tableName):
-        self.dynamodb = dynamodb = boto3.resource('dynamodb',endpoint_url="https://dynamodb.us-east-1.amazonaws.com") 
-        self.table = self.dynamodb.Table(tableName)
+        self.dynamodb = boto3.resource('dynamodb',endpoint_url="https://dynamodb.us-east-1.amazonaws.com") 
+        self.tableName = tableName
 
     def store_agency_route_stop(self, key, agency_id, stop_id, stop_name):
+        table = self.dynamodb.Table(self.tableName)
 
         try: 
-            response = self.table.put_item(
+            response = table.put_item(
                 Item={
                     'uid': key, #pk
                     'agency_id': agency_id,
@@ -24,7 +25,7 @@ class DynamoClient():
                 }
             )
         except Exception as e:
-            print(e.response['Error']['Message'])
+            print(e)
             print key, #pk
             print agency_id,
             print stop_id,
@@ -35,14 +36,16 @@ class DynamoClient():
 
     #return a tuple of success, dictionary of route info
     def get_route_info(self, key):
+        table = self.dynamodb.Table(self.tableName)
+
         try:
-            response = self.table.get_item(
+            response = table.get_item(
                 Key={
                     'uid': key,
                 }
             )
-        except ClientError as e:
-            print(e.response['Error']['Message'])
+        except Exception as e:
+            print(e)
         else:
             if 'Item' in response:
                 return True, response['Item']
