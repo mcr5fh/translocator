@@ -38,6 +38,10 @@ class TranslocController():
             "Accept": "application/json"
           }
         )
+        #check to make sure that there is a transloc agency nearby
+        if (len(response.body['data']) == 0 ):
+            return False
+
         # print(response.body['data'][0]['long_name'])
         # print(response.body['data'][0]['agency_id'])
         self.local_address = address
@@ -47,11 +51,12 @@ class TranslocController():
     #Will return a list of strings of the stops in the vicinity
     def set_closest_stop(self, address = None):
         if(address != None):
-            self.set_location(address)
+            if(self.set_location(address) == False):
+                return []
 
         if(self.local_agency_id == -1):
             logging.error('Agency id has not been set')
-            return None
+            return []
 
         g = geocoder.google(self.local_address)
         base_url = "https://transloc-api-1-2.p.mashape.com/stops.json?agencies=347&callback=call&"

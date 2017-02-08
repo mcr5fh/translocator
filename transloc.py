@@ -85,7 +85,7 @@ def get_nearest_bus(intent):
     session_attributes = {}
     card_title = "Transloc nearest bus time"
     speech_output = "You're trying to get a bus time. Awesome."
-    reprompt_text = "I'm not sure what you're asking for. "
+    reprompt_text = "I'm not sure what you're asking for."
     should_end_session = True 
 
     #Transloc 
@@ -133,7 +133,7 @@ def configure_location(intent):
             #speech_output = "The address you provided is " + addr
             speech_output = "Your stop is now set to " + stop_list[0]
         else: 
-            speech_output = "There was an error configuring your stop. Please try again."
+            speech_output = "There were no bus stops found near your location. Make sure Transloc has bus stops near you."
             should_end_session = True
 
     return build_response(session_attributes, build_speechlet_response(
@@ -144,7 +144,7 @@ def get_option(intent):
     card_title = "Translocator get option"
     speech_output = "This was not a valid option. Please try again."
     reprompt_text = "Please provide a valid option."
-    should_end_session = False
+    should_end_session = True
 
     if translocController.get_getting_options() == False:
         speech_output = "Please start by using the keyword configure."
@@ -212,7 +212,7 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
 
 def build_response(session_attributes, speechlet_response):
     return {
-        "version": "1.0",
+        "version": "1.1",
         "sessionAttributes": session_attributes,
         "response": speechlet_response
     }
