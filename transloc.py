@@ -36,7 +36,8 @@ def on_session_started(session_started_request, session):
     print "Starting new session."
 
 def on_launch(launch_request, session):
-    return get_welcome_response()
+    is_welcome_message = True
+    return get_welcome_response(is_welcome_message)
 
 def on_intent(intent_request, session):
     intent = intent_request["intent"]
@@ -63,7 +64,8 @@ def on_intent(intent_request, session):
         if query_success:
             global first_session
             first_session = False
-        return get_welcome_response()
+        is_welcome_message = False
+        return get_welcome_response(is_welcome_message)
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     else:
@@ -94,16 +96,19 @@ def get_nearest_bus(intent):
     
     #Make sure everything is configured
     if(agency_id == -1 or stop_id == -1):
-        speech_output = "An error has occured in finding your stop. Please configure location"
+        speech_output = "You must configure your location before we can find your stop and bus times."
         return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
     #sample data
     # min_till_bus = translocController.get_next_bus_arrival(347, 4123822)
     min_till_bus = translocController.get_next_bus_arrival(agency_id, stop_id)
-
-    speech_output = "The next bus is in " + str(min_till_bus) + " minutes"
-
+    if min_till_bus == -1:
+        speech_output = "Transloc buses are not running at this time."
+    elif min_till_bus == -99:
+        speech_output = "An error occurred calling the Transloc API. Please report this to mcr5fh@virginia.edu."
+    else: 
+        speech_output = "The next bus is in " + str(min_till_bus) + " minutes"
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
 
@@ -116,7 +121,6 @@ def configure_location(intent):
 
     if "address" in intent["slots"]:
         addr = intent["slots"]["address"]["value"]
-
         stop_list = translocController.set_closest_stop(addr)
         if(len(stop_list) > 1):
             #set list in controller
@@ -175,13 +179,19 @@ def get_option(intent):
     card_title, speech_output, reprompt_text, should_end_session))    
 
 
-def get_welcome_response():
+def get_welcome_response(is_welcome_message):
     session_attributes = {}
     card_title = "Translocator"
-    speech_output = "Welcome to the Translocator skill. "
+    speech_output = ""
+    if is_welcome_message:
+        speech_output += "Welcome to the Translocator skill. "
+
     if first_session:
         speech_output += "Configure your device's location using the " \
         "'configure' keyword, followed by your address."
+    else:
+        speech_output += "Get the next bus arrival time to your local stop " \
+        "by saying 'get the next bus time'."
 
     reprompt_text = "You can ask when the next bus is coming to your nearest stop." \
                     "You can also configure your device's location by saying configure followed by your address."
