@@ -157,23 +157,27 @@ def get_option(intent):
         card_title, speech_output, reprompt_text, should_end_session))    
 
     if "option" in intent["slots"]:
-        speech_output = "option is a slot."
-        option = intent["slots"]["option"]["value"]
-        option = int(option)
-        stop_list = translocController.get_closest_stop_list()
-#       speech_output += " stop_list is " + str(len(stop_list)) + "entries long. provided option: " + option
-        if option <= len(stop_list):
-            #need the minus ones for indexing
-            stop_name = stop_list[option-1]
-            translocController.set_stop_id_from_stop_list(option-1)
+        try:
+            speech_output = "option is a slot."
+            option = intent["slots"]["option"]["value"]
+            option = int(option)
+            stop_list = translocController.get_closest_stop_list()
+    #       speech_output += " stop_list is " + str(len(stop_list)) + "entries long. provided option: " + option
+            if option <= len(stop_list):
+                #need the minus ones for indexing
+                stop_name = stop_list[option-1]
+                translocController.set_stop_id_from_stop_list(option-1)
 
-            speech_output = "You chose option " + str(option) + ": " + stop_name
+                speech_output = "You chose option " + str(option) + ": " + stop_name
 
-            #store the location data
-            if not dynamoClient.store_agency_route_stop(dynamo_table_key, translocController.get_agency_id(), 
-                translocController.get_stop_id(), stop_name):
-                speech_output = "There was an error choosing the option: " + stop_name
-
+                #store the location data
+                if not dynamoClient.store_agency_route_stop(dynamo_table_key, translocController.get_agency_id(), 
+                    translocController.get_stop_id(), stop_name):
+                    speech_output = "There was an error choosing the option: " + stop_name
+        except Exception as e:
+            speech_output = "There was an error choosing your option. Please try configuring your locaion again."
+            print "Error in Get Option"
+            print e
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))    
