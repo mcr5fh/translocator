@@ -1,12 +1,14 @@
+from __future__ import print_function
 import datetime
 import unirest
 import logging
 import geocoder
 import time
-
+from geopy.distance import great_circle
 
 class TranslocController():
     OVER_QUERY_LIMIT = "OVER_QUERY_LIMIT"
+    STOP_RADIUS = 0.25
 
     def __init__(self):
         logging.basicConfig(filename='trans.log', level=logging.DEBUG)
@@ -27,7 +29,7 @@ class TranslocController():
         base_agency_url = "https://transloc-api-1-2.p.mashape.com/agencies.json?callback=call&"
         geo_area = self.get_geo_area_string(address)
         if geo_area == None:
-            print "Invalid address. Unable to set location."
+            print("Invalid address. Unable to set location.")
             return False
 
         response = unirest.get(base_agency_url + geo_area,
@@ -38,10 +40,11 @@ class TranslocController():
                                )
         # check to make sure that there is a transloc agency nearby
         if (len(response.body['data']) == 0):
+            print("Found no transloc nearby")
             return False
 
-        # print(response.body['data'][0]['long_name'])
-        # print(response.body['data'][0]['agency_id'])
+        print(response.body['data'][0]['long_name'])
+        print(response.body['data'][0]['agency_id'])
         self.local_address = address
         self.local_agency_id = response.body['data'][0]['agency_id']
         self.acgency_long_name = response.body['data'][0]['long_name']
@@ -54,26 +57,32 @@ class TranslocController():
 
         if(self.local_agency_id == -1):
             logging.error('Agency id has not been set')
+            print('Agency id has not been set')
             return []
 
-        base_stop_url = "https://transloc-api-1-2.p.mashape.com/stops.json?agencies=347&callback=call&"
+        base_stop_url = "https://transloc-api-1-2.p.mashape.com/stops.json?agencies=" + str(self.local_agency_id) + "&callback=call&"
         geo_area = self.get_geo_area_string(address)
 
-        response = unirest.get(base_stop_url + geo_area,
+        response = unirest.get(base_stop_url,
                                headers={
                                    "X-Mashape-Key": "P5XVDHDhPEmshrYNeT29XndUunS4p1EPDrOjsnosBj9nVdvjit",
                                    "Accept": "application/json"
                                }
                                )
-        print response
+        # print(response.body)
+        
+        g = geocoder.google(address)
+        addr_cords = g.latlng
 
         stop_list_str = []
         stop_list_id = []
         for stop_data in response.body['data']:
-            stop_list_str.append(stop_data['name'].encode('utf8'))
-            stop_list_id.append(stop_data['stop_id'])
+            stop_cords = (stop_data['location']['lat'], stop_data['location']['lng'])
+            if(great_circle(stop_cords, addr_cords).miles < self.STOP_RADIUS):
+                stop_list_str.append(stop_data['name'].encode('utf8'))
+                stop_list_id.append(stop_data['stop_id'])
 
-        # logging.info(stop_list)
+        print(stop_list_str)
         self.local_nearby_stops = stop_list_str
         self.local_nearby_stop_ids = stop_list_id
         return stop_list_str
@@ -96,7 +105,7 @@ class TranslocController():
         # accesses the first (next arriving bus from the list)
         try:
             if len(response.body['data']) == 0:
-                print "No available bus times"
+                print("No available bus times")
                 return -1
             next_arrival_time = response.body['data'][0]['arrivals'][0]['arrival_at']
             # gives us something like this: '2016-12-22T17:31:55-05:00'
@@ -116,13 +125,14 @@ class TranslocController():
 
             return delta_mins
         except Exception as e:
-            print "Api error getting bus time: Response body: " + str(response.body)
-            print e
+            print("Api error getting bus time: Response body: " + str(response.body))
+            print(e)
             return -99
 
     # Return a string containing the "geo-box" long/lat coordinates of an address
     # Return None if the address couldn't be found
     def get_geo_area_string(self, address):
+        print("Getting geo area for: " + address)
         g = geocoder.google(
             address, key="AIzaSyC2NbM2cmbj7O2MNqfFTyQI9uT0RX4PzP0")
         #<[OK] Google - Geocode [608 Preston Pl, Charlottesville, VA 22903, USA]>
@@ -133,26 +143,28 @@ class TranslocController():
         # retry
         for x in range(0, 10):
             if g.error == self.OVER_QUERY_LIMIT:
-                print "Throttled, sleeping for 1.5 sec"
+                print("Throttled, sleeping for 1.5 sec")
                 time.sleep(1.5)
                 g = geocoder.google(address)
             else:
                 break
-        print g
+        print(g)
 
         # If bbox is still null, the address cant be found
         if not g.bbox:
+            print("Cannot find address")
             return None
 
         # just goes in order as you'd expect from the api
         try:
-            return "geo_area=" + str(g.bbox['northeast'][0]) + "%2C+" \
-                + str(g.bbox['northeast'][1]) + "%7C" \
-                + str(g.bbox['southwest'][0]) + "%2C+"  \
-                + str(g.bbox['southwest'][1])
+            #Trim the coordinates for a larger radius
+            return "geo_area=" + str(g.bbox['northeast'][0])[:8] + "%2C+" \
+                + str(g.bbox['northeast'][1])[:8] + "%7C" \
+                + str(g.bbox['southwest'][0])[:8] + "%2C+"  \
+                + str(g.bbox['southwest'][1])[:8]
         except Exception as e:
-            print "Unable to find address: " + address
-            print e
+            print("Unable to find address: " + address)
+            print(e)
             return []
 
 # ---------- Getters and Setters ----------

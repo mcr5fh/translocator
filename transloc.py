@@ -1,3 +1,4 @@
+from __future__ import print_function
 import urllib2
 import json
 import unirest
@@ -5,6 +6,7 @@ import unirest
 from dynamoClient import DynamoClient
 #transloc API
 from translocController import TranslocController
+
 ########################## Globals ##################################
 
 tableName = "TranslocatorUserInfo"
@@ -33,7 +35,7 @@ def lambda_handler(event, context):
         return on_session_ended(event["request"], event["session"])
 
 def on_session_started(session_started_request, session):
-    print "Starting new session."
+    print("Starting new session.")
 
 def on_launch(launch_request, session):
     is_welcome_message = True
@@ -72,7 +74,7 @@ def on_intent(intent_request, session):
         raise ValueError("Invalid intent")
 
 def on_session_ended(session_ended_request, session):
-    print "Ending session."
+    print("Ending session.")
     # Cleanup goes here...
     
 
@@ -80,7 +82,7 @@ def handle_session_end_request():
     card_title = "Translocator - Thanks"
     speech_output = "Thank you for using the translocator skill.  See you next time!"
     should_end_session = True
-    print speech_output
+    print(speech_output)
     return build_response({}, build_speechlet_response(card_title, speech_output, None, should_end_session))
 
 def get_nearest_bus(intent):
@@ -110,7 +112,7 @@ def get_nearest_bus(intent):
     else: 
         speech_output = "The next bus is in " + str(min_till_bus) + " minutes"
 
-    print speech_output
+    print(speech_output)
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
 
@@ -142,7 +144,7 @@ def configure_location(intent):
             speech_output = "There were no bus stops found near your location. Make sure Transloc has bus stops near you."
             should_end_session = True
     
-    print speech_output
+    print(speech_output)
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))
@@ -180,10 +182,10 @@ def get_option(intent):
                     speech_output = "There was an error choosing the option: " + stop_name
         except Exception as e:
             speech_output = "There was an error choosing your option. Please try configuring your locaion again."
-            print "Error in Get Option"
-            print e
+            print("Error in Get Option")
+            print(e)
     
-    print speech_output
+    print(speech_output)
 
     return build_response(session_attributes, build_speechlet_response(
     card_title, speech_output, reprompt_text, should_end_session))    
@@ -206,7 +208,7 @@ def get_welcome_response(is_welcome_message):
     reprompt_text = "You can ask when the next bus is coming to your nearest stop." \
                     "You can also configure your device's location by saying configure followed by your address."
     should_end_session = False
-    print speech_output
+    print(speech_output)
 
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))

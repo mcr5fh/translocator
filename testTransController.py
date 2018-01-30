@@ -1,8 +1,11 @@
 from translocController import TranslocController
 t = TranslocController()
 # t.set_location("608 Preston Pl, Charlottesville, VA 22903")
-t.get_geo_area_string("421 McCormick Rd, Charlottesville, VA 22904")
-t.set_closest_stop("421 McCormick Rd, Charlottesville, VA 22904")
+loc = "3 Sweet Fern Ln, Coventry, RI 02816, USA"
+# loc = "608 Preston Place Charlottesville, VA"
+# loc = "576 Whitney Ave, New Haven, CT 06511"
+print(t.get_geo_area_string(loc))
+t.set_closest_stop(loc)
 print(t.get_closest_stop_list())
 # res = t.get_next_bus_arrival(347, 4123822)
 # print res
